@@ -1,6 +1,6 @@
 {
   "name": "light-md-viewer",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A read-only Markdown viewer for Windows.",
   "author": "chryaner",
   "license": "MIT",
@@ -14,7 +14,8 @@
     "scan:release": "node scripts/scan.js --require-scan",
     "lint": "eslint . && prettier --check .",
     "lint:fix": "eslint . --fix && prettier --write .",
-    "test": "node --test \"test/*.test.js\""
+    "test": "node --test \"test/*.test.js\"",
+    "icon": "electron scripts/make-icon.js"
   },
   "dependencies": {
     "dompurify": "3.4.12",

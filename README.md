@@ -1,4 +1,4 @@
-# Light MD Viewer
+# <img src="docs/icon.png" width="26" align="top"> Light MD Viewer
 
 A read-only Markdown viewer for Windows.
 

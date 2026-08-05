@@ -25,12 +25,17 @@ fileAssociations:
     name: Markdown
     description: Markdown Document
     role: Viewer
+    icon: build/icon.ico
   - ext: markdown
     name: Markdown
     description: Markdown Document
     role: Viewer
+    icon: build/icon.ico
 
 win:
+  # Built by `npm run icon` from the two SVGs beside it. Sizes up to 32 px use a simplified glyph
+  # so the icon still reads in the taskbar.
+  icon: build/icon.ico
   target:
     - target: nsis
       arch:

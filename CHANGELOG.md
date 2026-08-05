@@ -5,6 +5,14 @@ All notable changes to this project are documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and this project
 adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.1] - 2026-08-05
+
+### Added
+
+- An application icon, shown on the executables, the installer, the window and associated
+  Markdown files. Sizes up to 32 px use a simplified glyph so it still reads in the taskbar.
+  `npm run icon` rebuilds `build/icon.ico` from the SVGs beside it.
+
 ## [0.1.0] - 2026-08-04
 
 First release.
@@ -35,4 +43,5 @@ First release.
 - Windows installer and portable executable, built in GitHub Actions and published with SHA-256
   sums, a virus scan report and a build provenance attestation.
 
+[0.1.1]: https://github.com/chryaner/light-md-viewer/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/chryaner/light-md-viewer/releases/tag/v0.1.0
