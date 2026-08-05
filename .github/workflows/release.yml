@@ -79,7 +79,7 @@ jobs:
       # Third-party action, pinned to a full commit SHA: a moved tag must not be able to
       # swap the binaries and regenerate matching hashes/scan reports on the way out.
       - name: Publish release
-        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           draft: false
           # Never publish without the scan evidence the verification story depends on.
