@@ -30,7 +30,7 @@ jobs:
       # configuration error AFTER running every query, which reads like a broken analysis.
       actions: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       # Pinned to a full commit SHA: a moved tag must not be able to change what analyses
       # this code or what it reports. Dependabot bumps the SHA and the comment together.
@@ -64,7 +64,7 @@ jobs:
     permissions:
       contents: read
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v4
         with:
