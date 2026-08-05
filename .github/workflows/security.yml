@@ -1,0 +1,80 @@
+name: Security
+
+on:
+  push:
+    # Tags as well as main: a tag can point at any commit, including one that never landed on
+    # main, and that is the commit a release is built and attested from. Without this the
+    # release path would be the one path these checks never see.
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  schedule:
+    # Weekly, because CodeQL ships new queries that can find old bugs in code that has not
+    # changed since the last release.
+    - cron: '31 4 * * 1'
+
+permissions:
+  contents: read
+
+jobs:
+  # Proves: this project's own source (main.js, main/, preload.js, renderer/*.js, scripts/,
+  # test/) has no findings from CodeQL's JavaScript security queries.
+  codeql:
+    name: CodeQL
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # upload the results to code scanning
+      # The analyse step reads its own workflow run through the REST API to label the results.
+      # Without this it gets "Resource not accessible by integration" and reports a
+      # configuration error AFTER running every query, which reads like a broken analysis.
+      actions: read
+    steps:
+      - uses: actions/checkout@v4
+
+      # Pinned to a full commit SHA: a moved tag must not be able to change what analyses
+      # this code or what it reports. Dependabot bumps the SHA and the comment together.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@d1ba80a13dd99fba24a470575428917156a28b43 # v4.37.5
+        with:
+          languages: javascript-typescript
+          build-mode: none # interpreted language: analysed straight from source
+          # renderer/vendor/ holds third-party browser builds copied in by scripts/vendor.js,
+          # so alerts there would be about marked/DOMPurify/highlight.js rather than about this
+          # project - the same reason eslint.config.js ignores it. Those files are covered by
+          # the vendor-integrity job below instead. security-extended trades a few more false
+          # positives for the two Electron queries (js/disabling-electron-websecurity and
+          # js/enabling-electron-insecure-content), which the default suite does not include.
+          config: |
+            paths-ignore:
+              - renderer/vendor
+            queries:
+              - uses: security-extended
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@d1ba80a13dd99fba24a470575428917156a28b43 # v4.37.5
+
+  # Proves: every committed file in renderer/vendor/ is byte-for-byte what the pinned npm
+  # packages publish. These files are the easiest place to hide modified library code - no
+  # review catches an edit buried in 127 KB of minified highlight.js - and they are the only
+  # third-party JavaScript that actually ships inside the .exe.
+  vendor-integrity:
+    name: Vendored library integrity
+    runs-on: windows-latest # same platform as ci.yml and the release build
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      # --ignore-scripts skips electron's ~100 MB binary download; this job never runs the app.
+      - run: npm ci --ignore-scripts
+
+      # Byte-compares every committed file in renderer/vendor/ with the copy the freshly
+      # installed package ships, prints both SHA-256s and exits 1 on any difference. It must
+      # not be preceded by `npm run vendor`: that would overwrite the files under test.
+      - run: npm run verify:vendor

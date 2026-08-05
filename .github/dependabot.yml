@@ -1,0 +1,19 @@
+version: 2
+updates:
+  # electron is the third-party code that actually ships inside the .exe, so a security
+  # release of it is the update that reaches users. The vendored libraries (marked,
+  # DOMPurify, highlight.js) are updated here too, and the vendor-integrity job in
+  # security.yml fails until renderer/vendor/ is refreshed to match the new version.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+
+  # Keeps the SHA-pinned actions in release.yml and security.yml current: Dependabot
+  # rewrites the pinned SHA and the trailing "# v..." comment together, so pinning does
+  # not cost update visibility.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly

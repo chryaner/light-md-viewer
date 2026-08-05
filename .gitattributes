@@ -1,0 +1,3 @@
+# The repository is LF-only. Without this, a Windows checkout produces CRLF working files
+# and `prettier --check` fails for everyone, including CI.
+* text=auto eol=lf

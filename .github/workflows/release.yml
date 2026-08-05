@@ -1,0 +1,130 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+# Default-deny for the workflow; the one job below asks for exactly what it needs.
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+    # A job-level block REPLACES the workflow-level one, so contents: write has to be
+    # re-stated here or the release upload fails with 403.
+    permissions:
+      contents: write # create the release and upload its assets
+      id-token: write # mint the OIDC token Sigstore signs the provenance with
+      attestations: write # store the attestation against this repository
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      # Ordering is load-bearing: this compares the committed renderer/vendor/ against the
+      # freshly installed packages, so it has to run BEFORE `npm run vendor` overwrites those
+      # files. After it, the check would only compare node_modules with a copy of itself and
+      # could never fail. A tag can point at any commit, so this is also what stops a release
+      # built from a tree whose vendored libraries never passed the checks in security.yml.
+      - run: npm run verify:vendor
+      - run: npm run vendor
+      - run: npm run build
+
+      # This gate is the whole trust story for unsigned binaries, so it must be able to stop a
+      # release. scan:release is `npm run scan` plus --require-scan, which makes "no scanner
+      # verdict at all" a failure too: if a future runner image ships without Defender, that
+      # must be loud rather than a release with no antivirus evidence attached to it. It is a
+      # named script rather than `npm run scan -- --require-scan` so that no shell can drop the
+      # flag on the way through and quietly turn the gate off.
+      - name: Malware scan
+        run: npm run scan:release
+
+      - name: Generate SHA256SUMS.txt
+        shell: pwsh
+        run: |
+          Set-Location dist
+          Get-ChildItem -Filter *.exe | ForEach-Object {
+            "{0}  {1}" -f (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(), $_.Name
+          } | Set-Content -Encoding utf8 SHA256SUMS.txt
+          Get-Content SHA256SUMS.txt
+
+      # Signs a SLSA provenance statement over the exact bytes uploaded below, tying them
+      # to this repository, this commit and this workflow run. It has to run after the
+      # build and before the upload, in this job: anything that rewrites an .exe
+      # afterwards would silently invalidate the attestation.
+      # Forward slashes on purpose: the glob library does not match Windows separators.
+      # Pinned to a full commit SHA like every other third-party action here, and for a
+      # sharper reason: this step runs with the signing credentials and with the finished
+      # binaries on disk, so a moved tag could substitute them and attest the substitute.
+      - name: Attest build provenance
+        id: attest
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4.2.1
+        with:
+          subject-path: 'dist/*.exe'
+
+      # Published as a release asset so the provenance can be checked with `--bundle`,
+      # which needs no GitHub account. Without it, verification requires a logged-in
+      # `gh` because the attestations REST endpoint demands a token even for public repos.
+      - name: Stage attestation bundle for release
+        shell: pwsh
+        run: Copy-Item '${{ steps.attest.outputs.bundle-path }}' dist/attestation.jsonl
+
+      # Third-party action, pinned to a full commit SHA: a moved tag must not be able to
+      # swap the binaries and regenerate matching hashes/scan reports on the way out.
+      - name: Publish release
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
+        with:
+          draft: false
+          # Never publish without the scan evidence the verification story depends on.
+          fail_on_unmatched_files: true
+          files: |
+            dist/*.exe
+            dist/SHA256SUMS.txt
+            dist/SCAN-REPORT.md
+            dist/scan-report.json
+            dist/attestation.jsonl
+          # NOTE: the --signer-workflow value below hardcodes this file's path. If this
+          # workflow is ever renamed or moved, update it here too, or every published
+          # verification command starts failing and looks like a bad download.
+          body: |
+            ### Verifying this download
+
+            These builds are **not** code-signed, so Windows SmartScreen will warn about
+            them. Nothing below makes that warning go away. What it does give you is a
+            way to confirm, without trusting the maintainer, that the file you downloaded
+            is exactly what this repository's public CI built from this tag.
+
+            Replace `FILE.exe` with the file you downloaded.
+
+            **1. Check the hash.** It must appear in `SHA256SUMS.txt`:
+
+            ```
+            certutil -hashfile FILE.exe SHA256
+            ```
+
+            **2. Check the build provenance.** This proves the file was produced by
+            `.github/workflows/release.yml` in this repository, on a GitHub-hosted runner,
+            and not by anyone else. Needs the [GitHub CLI](https://cli.github.com) and a
+            `gh auth login`:
+
+            ```
+            gh attestation verify FILE.exe --repo ${{ github.repository }} --signer-workflow ${{ github.repository }}/.github/workflows/release.yml --deny-self-hosted-runners
+            ```
+
+            No GitHub account? Download `attestation.jsonl` from this release and pass it
+            with `--bundle`; that reads the signature from the file instead of from GitHub's
+            API, so it needs no login:
+
+            ```
+            gh attestation verify FILE.exe --repo ${{ github.repository }} --signer-workflow ${{ github.repository }}/.github/workflows/release.yml --deny-self-hosted-runners --bundle attestation.jsonl
+            ```
+
+            **3. Read `SCAN-REPORT.md`.** It holds the Windows Defender scan result and
+            VirusTotal links for these exact hashes.

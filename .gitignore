@@ -1,0 +1,6 @@
+node_modules/
+dist/
+npm-debug.log*
+*.log
+
+# renderer/vendor/ is intentionally COMMITTED — the packaged app ships without node_modules.

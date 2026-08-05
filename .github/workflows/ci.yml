@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    # Tags as well as main, for the same reason as in security.yml: a tag can point at a commit
+    # that never landed on main, and that is the commit a release is built from.
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  check:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+      - run: npm run vendor
+      - run: npm run lint
+      - run: npm test
+
+      # Boots the real Electron app: it must reach ready-to-show and exit cleanly. The app only
+      # quits from inside ready-to-show, so a regression that never fires it would otherwise hang
+      # here until the six-hour job limit instead of failing in seconds.
+      - name: Smoke test
+        timeout-minutes: 5
+        run: npx electron . --smoke
