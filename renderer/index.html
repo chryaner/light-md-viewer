@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; img-src file: data:"
+    />
+    <title>Light MD Viewer</title>
+    <!-- highlight.js and its two themes are not loaded here: they are ~130 KB that most documents
+         never use. renderer.js appends them the first time a document turns out to contain a code
+         block. See loadHighlighter(). -->
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <aside id="outline">
+      <h2 class="outline-title">Outline</h2>
+      <nav id="outline-list" aria-label="Document outline"></nav>
+    </aside>
+
+    <div id="toolbar">
+      <button
+        id="outline-toggle"
+        type="button"
+        class="tool-button"
+        aria-pressed="false"
+        aria-label="Toggle outline"
+        title="Toggle outline (Ctrl+Shift+O)"
+      >
+        <svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M2 3h12v1.6H2V3zm2 4h10v1.6H4V7zm2 4h8v1.6H6V11z" />
+        </svg>
+      </button>
+
+      <div class="segmented" role="group" aria-label="Content width">
+        <button type="button" class="segment" data-width="narrow" title="Narrow — 680 px">
+          Narrow
+        </button>
+        <button type="button" class="segment" data-width="default" title="Default — 760 px">
+          Default
+        </button>
+        <button type="button" class="segment" data-width="wide" title="Wide — 980 px">Wide</button>
+        <button type="button" class="segment" data-width="full" title="Full width">Full</button>
+      </div>
+    </div>
+
+    <div id="findbar" role="search" aria-label="Find in document">
+      <input
+        id="find-input"
+        type="text"
+        maxlength="256"
+        placeholder="Find"
+        aria-label="Find in document"
+        autocomplete="off"
+        spellcheck="false"
+      />
+      <span id="find-count" class="find-count" aria-live="polite"></span>
+      <button
+        id="find-prev"
+        type="button"
+        class="tool-button"
+        aria-label="Previous match"
+        title="Previous match (Shift+Enter)"
+      >
+        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M8 5.2l5.1 5.1-1.1 1.1L8 7.4l-4 4-1.1-1.1z" />
+        </svg>
+      </button>
+      <button
+        id="find-next"
+        type="button"
+        class="tool-button"
+        aria-label="Next match"
+        title="Next match (Enter)"
+      >
+        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" focusable="false">
+          <path fill="currentColor" d="M8 10.8L2.9 5.7 4 4.6l4 4 4-4 1.1 1.1z" />
+        </svg>
+      </button>
+      <button
+        id="find-close"
+        type="button"
+        class="tool-button"
+        aria-label="Close find bar"
+        title="Close (Esc)"
+      >
+        <svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true" focusable="false">
+          <path
+            fill="currentColor"
+            d="M4.2 3.1L8 6.9l3.8-3.8 1.1 1.1L9.1 8l3.8 3.8-1.1 1.1L8 9.1l-3.8 3.8-1.1-1.1L6.9 8 3.1 4.2z"
+          />
+        </svg>
+      </button>
+    </div>
+
+    <div id="welcome">
+      <div class="welcome-inner">
+        <h1>Light MD Viewer</h1>
+        <p>Drop a Markdown file here or press Ctrl+O</p>
+      </div>
+    </div>
+
+    <main id="content" class="markdown-body" tabindex="-1" hidden></main>
+
+    <div id="zoom-toast" role="status" aria-live="polite"></div>
+
+    <script src="vendor/marked.umd.js"></script>
+    <script src="vendor/purify.min.js"></script>
+    <script src="lib.js"></script>
+    <script src="renderer.js"></script>
+  </body>
+</html>

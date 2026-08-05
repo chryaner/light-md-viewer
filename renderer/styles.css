@@ -1,0 +1,697 @@
+:root {
+  --bg: #ffffff;
+  --fg: #1f2328;
+  --fg-muted: #59636e;
+  --link: #0969da;
+  --border: #d1d9e0;
+  --border-soft: #e4e8ed;
+  --code-bg: #f3f4f6;
+  --quote-fg: #59636e;
+  --table-stripe: #f7f8fa;
+  --scrollbar: #c9d1d9;
+  --scrollbar-hover: #a8b1bb;
+  --accent-soft: #dbeafe;
+
+  /* Find matches. Only colour separates the active match from the rest: ::highlight() paints
+     text and background and nothing else — no border, no outline. */
+  --find-bg: #fff2a8;
+  --find-fg: #1f2328;
+  --find-active-bg: #ffb02e;
+  --find-active-fg: #1f2328;
+
+  /* Floating chrome: the toolbar, the find bar and the outline sidebar. */
+  --panel-bg: rgba(255, 255, 255, 0.78);
+  --control-hover: #eceff2;
+  --shadow: 0 2px 8px rgba(31, 35, 40, 0.09);
+  --toast-bg: rgba(31, 35, 40, 0.92);
+  --toast-fg: #ffffff;
+
+  /* Layout. --content-width is also set inline on :root by the width control. */
+  --content-width: 760px;
+  --outline-width: 240px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0d1117;
+    --fg: #e6edf3;
+    --fg-muted: #9198a1;
+    --link: #4493f8;
+    --border: #3d444d;
+    --border-soft: #2a3038;
+    --code-bg: #161b22;
+    --quote-fg: #9198a1;
+    --table-stripe: #12171f;
+    --scrollbar: #30363d;
+    --scrollbar-hover: #484f58;
+    --accent-soft: #12283f;
+
+    --find-bg: #4d3b0b;
+    --find-fg: #e6edf3;
+    --find-active-bg: #d29922;
+    --find-active-fg: #0d1117;
+
+    --panel-bg: rgba(22, 27, 34, 0.78);
+    --control-hover: #21262d;
+    --shadow: 0 2px 10px rgba(1, 4, 9, 0.5);
+    --toast-bg: rgba(230, 237, 243, 0.92);
+    --toast-fg: #0d1117;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+html {
+  scroll-behavior: auto;
+}
+
+body {
+  margin: 0;
+  padding-left: 0;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Segoe UI Variable Text', Roboto,
+    'Helvetica Neue', Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  transition: padding-left 120ms ease;
+}
+
+body.outline-open {
+  padding-left: var(--outline-width);
+}
+
+body.dragging {
+  outline: 2px dashed var(--link);
+  outline-offset: -8px;
+}
+
+/* ---------------------------------------------------------------- welcome */
+
+#welcome {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  text-align: center;
+  color: var(--fg-muted);
+  user-select: none;
+  cursor: default;
+}
+
+.welcome-inner h1 {
+  margin: 0 0 0.4em;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+.welcome-inner p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* ---------------------------------------------------------------- content */
+
+.markdown-body {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  /* Top padding clears the floating toolbar, which is 44px tall at the widest. */
+  padding: 56px 28px 96px;
+  word-wrap: break-word;
+}
+
+.markdown-body:focus {
+  outline: none;
+}
+
+.markdown-body > *:first-child {
+  margin-top: 0;
+}
+
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+  margin: 1.6em 0 0.6em;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.markdown-body h1 {
+  font-size: 2em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.markdown-body h2 {
+  font-size: 1.5em;
+  padding-bottom: 0.3em;
+  border-bottom: 1px solid var(--border-soft);
+}
+
+.markdown-body h3 {
+  font-size: 1.25em;
+}
+.markdown-body h4 {
+  font-size: 1em;
+}
+.markdown-body h5 {
+  font-size: 0.9em;
+}
+.markdown-body h6 {
+  font-size: 0.85em;
+  color: var(--fg-muted);
+}
+
+.markdown-body p,
+.markdown-body ul,
+.markdown-body ol,
+.markdown-body blockquote,
+.markdown-body table,
+.markdown-body pre {
+  margin: 0 0 1em;
+}
+
+.markdown-body a {
+  color: var(--link);
+  text-decoration: none;
+}
+
+.markdown-body a:hover {
+  text-decoration: underline;
+}
+
+.markdown-body strong {
+  font-weight: 600;
+}
+
+.markdown-body img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 4px;
+}
+
+.markdown-body hr {
+  height: 1px;
+  margin: 2em 0;
+  border: 0;
+  background: var(--border);
+}
+
+/* lists */
+
+.markdown-body ul,
+.markdown-body ol {
+  padding-left: 1.8em;
+}
+
+.markdown-body li + li {
+  margin-top: 0.25em;
+}
+
+.markdown-body li > ul,
+.markdown-body li > ol {
+  margin: 0.25em 0 0;
+}
+
+/* marked emits task list items as a bare checkbox input, without a wrapper class. */
+.markdown-body li.task-list-item,
+.markdown-body li:has(> input[type='checkbox']) {
+  list-style: none;
+  margin-left: -1.5em;
+}
+
+.markdown-body input[type='checkbox'] {
+  margin: 0 0.5em 0 0;
+  vertical-align: middle;
+  accent-color: var(--link);
+}
+
+/* code */
+
+.markdown-body code,
+.markdown-body kbd,
+.markdown-body samp {
+  font-family: 'Cascadia Mono', Consolas, 'SF Mono', 'Liberation Mono', Menlo, monospace;
+  font-size: 0.875em;
+}
+
+.markdown-body :not(pre) > code {
+  padding: 0.2em 0.4em;
+  background: var(--code-bg);
+  border-radius: 5px;
+}
+
+.markdown-body pre {
+  padding: 14px 16px;
+  overflow-x: auto;
+  background: var(--code-bg);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  line-height: 1.5;
+}
+
+.markdown-body pre code {
+  padding: 0;
+  overflow: visible;
+  background: none;
+  white-space: pre;
+}
+
+/* The highlight.js themes paint tokens only: the block's background, padding and plain text
+   colour stay with the rules above, so a block looks the same whether or not its language
+   was recognised. */
+.markdown-body pre code.hljs {
+  padding: 0;
+  background: transparent;
+  color: inherit;
+}
+
+/* The copy button sits beside the <pre>, in a wrapper the renderer adds around every block. */
+.code-block {
+  position: relative;
+  margin: 0 0 1em;
+}
+
+.code-block > pre {
+  margin: 0;
+}
+
+.copy-button {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  padding: 2px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--fg-muted);
+  background: var(--bg);
+  border: 1px solid var(--border-soft);
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease;
+}
+
+.code-block:hover .copy-button,
+.code-block:focus-within .copy-button {
+  opacity: 1;
+}
+
+.copy-button:hover {
+  color: var(--fg);
+  background: var(--control-hover);
+}
+
+.copy-button.copied {
+  color: var(--fg);
+}
+
+/* front matter */
+
+.markdown-body .frontmatter {
+  margin: 0 0 1.6em;
+}
+
+.markdown-body .frontmatter > summary {
+  display: inline-block;
+  padding: 1px 8px;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+  border: 1px solid var(--border-soft);
+  border-radius: 999px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.markdown-body .frontmatter > summary:hover {
+  color: var(--fg);
+  background: var(--control-hover);
+}
+
+.markdown-body .frontmatter > pre {
+  margin: 8px 0 0;
+  font-size: 0.78rem;
+  color: var(--fg-muted);
+}
+
+/* quotes */
+
+.markdown-body blockquote {
+  padding: 0 1em;
+  color: var(--quote-fg);
+  border-left: 4px solid var(--border);
+}
+
+.markdown-body blockquote > *:last-child {
+  margin-bottom: 0;
+}
+
+/* tables */
+
+.markdown-body table {
+  display: block;
+  width: max-content;
+  max-width: 100%;
+  overflow-x: auto;
+  border-collapse: collapse;
+  font-size: 0.95em;
+}
+
+.markdown-body th,
+.markdown-body td {
+  padding: 6px 13px;
+  border: 1px solid var(--border);
+}
+
+.markdown-body th {
+  font-weight: 600;
+  background: var(--table-stripe);
+}
+
+.markdown-body tbody tr:nth-child(even) {
+  background: var(--table-stripe);
+}
+
+/* ---------------------------------------------------------------- floating panels */
+
+#toolbar,
+#findbar {
+  position: fixed;
+  /* 22px keeps the panel clear of the 12px scrollbar. */
+  right: 22px;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px;
+  background: var(--panel-bg);
+  border: 1px solid var(--border-soft);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  backdrop-filter: blur(10px);
+  user-select: none;
+}
+
+#toolbar {
+  top: 10px;
+}
+
+#findbar {
+  top: 58px;
+  padding-left: 10px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-6px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 0s linear 120ms;
+}
+
+#findbar.open {
+  opacity: 1;
+  visibility: visible;
+  transform: none;
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease,
+    visibility 0s;
+}
+
+.tool-button,
+.segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 24px;
+  padding: 2px 8px;
+  font-family: inherit;
+  font-size: 11px;
+  line-height: 1.6;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tool-button:hover,
+.segment:hover {
+  color: var(--fg);
+  background: var(--control-hover);
+}
+
+.tool-button[aria-pressed='true'],
+.segment[aria-pressed='true'] {
+  color: var(--fg);
+  background: var(--accent-soft);
+}
+
+.tool-button:focus-visible,
+.segment:focus-visible,
+.outline-item:focus-visible,
+.copy-button:focus-visible,
+.frontmatter > summary:focus-visible {
+  outline: 2px solid var(--link);
+  outline-offset: 1px;
+}
+
+.segmented {
+  display: flex;
+  gap: 2px;
+  padding-left: 4px;
+  border-left: 1px solid var(--border-soft);
+}
+
+#find-input {
+  width: 168px;
+  padding: 2px 0;
+  font-family: inherit;
+  font-size: 13px;
+  color: var(--fg);
+  background: transparent;
+  border: 0;
+  outline: none;
+}
+
+#find-input::placeholder {
+  color: var(--fg-muted);
+}
+
+.find-count {
+  min-width: 46px;
+  padding-right: 2px;
+  font-size: 11px;
+  text-align: right;
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The two highlights renderer.js registers with CSS.highlights. Both cover the active match; the
+   higher priority on 'find-active' is what makes it paint over 'find-match'. */
+
+::highlight(find-match) {
+  color: var(--find-fg);
+  background-color: var(--find-bg);
+}
+
+::highlight(find-active) {
+  color: var(--find-active-fg);
+  background-color: var(--find-active-bg);
+}
+
+/* ---------------------------------------------------------------- outline */
+
+#outline {
+  position: fixed;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 15;
+  width: var(--outline-width);
+  padding: 14px 10px 24px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--bg);
+  border-right: 1px solid var(--border-soft);
+  user-select: none;
+  transform: translateX(-100%);
+  visibility: hidden;
+  transition:
+    transform 120ms ease,
+    visibility 0s linear 120ms;
+}
+
+#outline.open {
+  transform: none;
+  visibility: visible;
+  transition:
+    transform 120ms ease,
+    visibility 0s;
+}
+
+.outline-title {
+  margin: 0 0 8px;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-muted);
+}
+
+.outline-item {
+  display: block;
+  width: 100%;
+  padding: 4px 8px;
+  overflow: hidden;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.4;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--fg-muted);
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.outline-item:hover {
+  color: var(--fg);
+  background: var(--control-hover);
+}
+
+.outline-item.active {
+  color: var(--fg);
+  background: var(--accent-soft);
+}
+
+.outline-item.level-2 {
+  padding-left: 20px;
+}
+
+.outline-item.level-3 {
+  padding-left: 32px;
+  font-size: 12.5px;
+}
+
+.outline-empty {
+  margin: 0;
+  padding: 4px 8px;
+  font-size: 12.5px;
+  color: var(--fg-muted);
+}
+
+/* ---------------------------------------------------------------- zoom toast */
+
+#zoom-toast {
+  position: fixed;
+  bottom: 28px;
+  left: 50%;
+  z-index: 30;
+  padding: 5px 14px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--toast-fg);
+  background: var(--toast-bg);
+  border-radius: 999px;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(4px);
+  transition:
+    opacity 120ms ease,
+    transform 120ms ease;
+}
+
+#zoom-toast.visible {
+  opacity: 1;
+  transform: translateX(-50%);
+}
+
+/* ---------------------------------------------------------------- scrollbars */
+
+::-webkit-scrollbar {
+  width: 12px;
+  height: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border: 3px solid var(--bg);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+}
+
+#outline::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* ---------------------------------------------------------------- motion */
+
+@media (prefers-reduced-motion: reduce) {
+  body,
+  #findbar,
+  #outline,
+  #zoom-toast,
+  .copy-button {
+    transition-duration: 0s;
+  }
+}
+
+/* ---------------------------------------------------------------- print */
+
+@media print {
+  /* Beats the inline --content-width the width control sets on :root. */
+  :root {
+    --content-width: 100% !important;
+  }
+
+  #toolbar,
+  #findbar,
+  #outline,
+  #zoom-toast,
+  .copy-button {
+    display: none !important;
+  }
+
+  /* A search that is still open belongs no more on paper than the bar it was typed into: the
+     highlights are painted by CSS, so hiding the bar alone would still print them. */
+  ::highlight(find-match),
+  ::highlight(find-active) {
+    color: inherit;
+    background-color: transparent;
+  }
+
+  /* The sidebar's padding must be gone in the print layout at once, not eased away. */
+  body {
+    padding-left: 0 !important;
+    transition: none;
+  }
+
+  /* The band that keeps the toolbar off the first heading is dead space on paper. */
+  .markdown-body {
+    padding-top: 0;
+  }
+}

@@ -1,0 +1,49 @@
+appId: com.chryaner.light-md-viewer
+productName: Light MD Viewer
+# copyright is derived automatically: "Copyright © <year> chryaner" (package.json author)
+
+directories:
+  output: dist
+
+# Strict whitelist. The app ships only vendored libraries (renderer/vendor/),
+# so node_modules is deliberately excluded from the asar.
+files:
+  - main.js
+  - main/**
+  - preload.js
+  - renderer/**
+  - package.json
+  - '!node_modules/**'
+
+asar: true
+
+# Unsigned builds: no signing configuration anywhere, and never demand one.
+forceCodeSigning: false
+
+fileAssociations:
+  - ext: md
+    name: Markdown
+    description: Markdown Document
+    role: Viewer
+  - ext: markdown
+    name: Markdown
+    description: Markdown Document
+    role: Viewer
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+
+nsis:
+  oneClick: true
+  perMachine: false
+  deleteAppDataOnUninstall: true
+  artifactName: light-md-viewer-${version}-${arch}-setup.${ext}
+
+portable:
+  artifactName: light-md-viewer-${version}-${arch}-portable.${ext}
