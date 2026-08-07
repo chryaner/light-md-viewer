@@ -6,16 +6,21 @@ A read-only Markdown viewer for Windows.
 
 ## Features
 
-- Opens on double-click, `Ctrl+O`, or drag and drop
-- Reloads when the file changes on disk, at the same scroll position
-- Find in page, with a match counter
-- Outline sidebar that follows the scroll
-- Syntax highlighting and a copy button on code blocks
-- Light or dark, following the Windows setting
-- Print and export to PDF
-- Remembers the window, the theme, and where you stopped reading in each file
+- **Opens in about a quarter of a second.** No workspace to pick, no project to load. Double-click
+  a file, or press `Ctrl+O`, or drop it on the window.
+- **Nothing to install alongside it.** Zero runtime dependencies: about 2,000 lines of JavaScript
+  and three libraries copied into the repository. The app itself is 286 KB inside the download.
+- **Search** with `Ctrl+F`: live match count, `Enter` and `Shift+Enter` to step through hits.
+- **Set the reading width** from the toolbar: Narrow, Default, Wide, or Full. Zoom with
+  `Ctrl` and the mouse wheel.
+- **Reloads as you write.** Leave it open beside your editor and every save appears, at the same
+  scroll position.
+- **Outline sidebar** listing the headings, highlighting the section you are reading.
+- Syntax highlighting with a copy button on every code block, dark or light following Windows,
+  print and export to PDF, and each file reopens where you stopped reading.
 
-Reads `.md`, `.markdown` and `.txt`. No editing, no tabs, no plugins, no network.
+Reads `.md`, `.markdown` and `.txt`. No editing, no tabs, no plugins, and it never touches the
+network.
 
 ![screenshot](docs/screenshot.png)
 
